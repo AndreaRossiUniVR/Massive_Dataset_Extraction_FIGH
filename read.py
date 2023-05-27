@@ -108,18 +108,18 @@ for team_index in [1, 2]:
 
     # Insert into Teams with ON CONFLICT DO UPDATE
     c.execute('''
-        INSERT INTO Teams (id, team_name, goals, goals_against)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO Teams (id, team_name, goals, goals_against, category)
+        VALUES (?, ?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET goals = goals + ?, goals_against = goals_against + ?
-    ''', (team_id, game[team_index][0], game[team_index][1], game[team_index][2], game[team_index][1], game[team_index][2]))
+    ''', (team_id, game[team_index][0], game[team_index][1], game[team_index][2], game[0][3], game[team_index][1], game[team_index][2]))
 
     for player in game[team_index][3]:
         player_id = (player['number'] + game[team_index][0] + game[0][3]).replace(' ', '')
 
         c.execute('''
-            INSERT INTO Players (id, team_id, game_id, number, name, goals, category)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (player_id, team_id, game_id, player['number'], player['name'], player['goals'], game[0][3]))
+            INSERT INTO Players (id, team_id, game_id, number, name, goals)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (player_id, team_id, game_id, player['number'], player['name'], player['goals']))
 
 db_conn.commit()
 print('commit')
