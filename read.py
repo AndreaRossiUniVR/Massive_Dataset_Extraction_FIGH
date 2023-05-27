@@ -14,13 +14,19 @@ pdf_reader = PyPDF2.PdfReader(pdf_file)
 
 num_pages = len(pdf_reader.pages)
 
-game = [[""] * 4 for _ in range(3)]
+game = [[""] * 5 for _ in range(3)]
 game[0][0] = input_pdf_file
 game_number = re.findall(r'\d+', input_pdf_file)
 game[0][1] = game_number[0] if game_number else "Not found"
 
-_, file_extension = os.path.splitext(input_pdf_file)
-game[0][2] = file_extension
+# Extract date instead of file extension
+date_regex = re.compile(r'Data(\d{2}/\d{2}/\d{4})\nA')
+for page in range(num_pages):
+    page_text = pdf_reader.pages[page].extract_text()
+    date_search = date_regex.search(page_text)
+    if date_search:
+        game[0][2] = date_search.group(1).strip()
+        break
 
 category_regex = re.compile(r'GIUOCO HANDBALL\s*(.*?)\s*Numero', re.DOTALL)
 for page in range(num_pages):
@@ -88,9 +94,9 @@ c = db_conn.cursor()
 
 # Insert the game into the Games table
 c.execute('''
-    INSERT INTO Games (id, home_team_id, away_team_id, category)
-    VALUES (?, ?, ?, ?)
-''', (game[0][1], game[1][0], game[2][0], game[0][3]))
+    INSERT INTO Games (id, home_team_id, away_team_id, category, date)
+    VALUES (?, ?, ?, ?, ?)
+''', (game[0][1], game[1][0], game[2][0], game[0][3], game[0][2]))
 
 # Get the id of the game we just inserted
 game_id = c.lastrowid
