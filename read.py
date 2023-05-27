@@ -86,26 +86,34 @@ for page in range(num_pages):
 db_conn = sqlite3.connect('fighDB.db')
 c = db_conn.cursor()
 
+# Insert the game into the Games table
+c.execute('''
+    INSERT INTO Games (id, home_team_id, away_team_id, category)
+    VALUES (?, ?, ?, ?)
+''', (game[0][1], game[1][0], game[2][0], game[0][3]))
+
+# Get the id of the game we just inserted
+game_id = c.lastrowid
+
 # Iterate over both teams
 for team_index in [1, 2]:
     team_id = game[team_index][0] + game[0][3]
     team_id = team_id.replace(' ', '')
 
+    # Insert into Teams with ON CONFLICT DO UPDATE
     c.execute('''
-        INSERT INTO Teams (id, team_name, goals, goals_against, home)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO Teams (id, team_name, goals, goals_against)
+        VALUES (?, ?, ?, ?)
         ON CONFLICT(id) DO UPDATE SET goals = goals + ?, goals_against = goals_against + ?
-    ''', (team_id, game[team_index][0], game[team_index][1], game[team_index][2], team_index == 1, game[team_index][1], game[team_index][2]))
+    ''', (team_id, game[team_index][0], game[team_index][1], game[team_index][2], game[team_index][1], game[team_index][2]))
 
     for player in game[team_index][3]:
         player_id = (player['number'] + game[team_index][0] + game[0][3]).replace(' ', '')
 
         c.execute('''
-            INSERT INTO Players (id, team_id, number, name, goals, category)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id) DO UPDATE SET goals = goals + ?
-        ''', (player_id, team_id, player['number'], player['name'], player['goals'], game[0][3], player['goals']))
-
+            INSERT INTO Players (id, team_id, game_id, number, name, goals, category)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (player_id, team_id, game_id, player['number'], player['name'], player['goals'], game[0][3]))
 
 db_conn.commit()
 print('commit')
