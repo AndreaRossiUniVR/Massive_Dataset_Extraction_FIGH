@@ -94,9 +94,9 @@ c = db_conn.cursor()
 
 # Insert the game into the Games table
 c.execute('''
-    INSERT INTO Games (id, home_team_id, away_team_id, category, date)
-    VALUES (?, ?, ?, ?, ?)
-''', (game[0][1], game[1][0], game[2][0], game[0][3], game[0][2]))
+    INSERT INTO Games (id, home_team_id, away_team_id, home_goals, away_goals, category, date)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+''', (game[0][1], game[1][0], game[2][0], game[1][1], game[2][1], game[0][3], game[0][2]))
 
 # Get the id of the game we just inserted
 game_id = c.lastrowid
