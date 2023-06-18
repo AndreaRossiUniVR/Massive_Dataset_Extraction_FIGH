@@ -19,7 +19,7 @@ game[0][0] = input_pdf_file
 game_number = re.findall(r'\d+', input_pdf_file)
 game[0][1] = game_number[0] if game_number else "Not found"
 
-# Extract date instead of file extension
+# Extract date 
 date_regex = re.compile(r'Data(\d{2}/\d{2}/\d{4})\nA')
 for page in range(num_pages):
     page_text = pdf_reader.pages[page].extract_text()
